@@ -1,0 +1,19 @@
+{
+  "name": "sat-asistente-virtual",
+  "version": "1.0.0",
+  "description": "Asistente virtual SAT - Fraccionamiento Inteligente con Astro",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev --host 0.0.0.0 --port $PORT",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.7.10"
+  },
+  "engines": {
+    "node": ">=18.14.1"
+  }
+}

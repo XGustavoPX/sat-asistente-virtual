@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAT - Asistente Virtual | Fraccionamiento Inteligente</title>
+    
+    <link rel="icon" type="image/png" href="Assets/icon/icon2.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="CSS/style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    
+<header class="main-header">
+  <div class="logo">
+    <img src="Assets/icon/icon2.png" alt="SAT Logo" />
+  </div>
+  <div class="header-actions">
+    <button class="btn-logout" onclick="window.openLogout()">
+      <i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+    <div class="modal-overlay" id="m-out">
+      <div class="modal-alerta">
+        <div class="modal-icon">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <h2>¿Finalizar sesión?</h2>
+        <p>Tu progreso se guardará automáticamente en nuestros servidores para tu próxima visita.</p>
+        <div class="modal-btns">
+          <button class="btn-confirmar" onclick="window.location.href='https://www.sat.gob.pe/'">Sí, salir</button>
+          <button class="btn-cancelar" onclick="window.closeLogout()">Volver</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="main-layout">
+      <div class="split-container">
+        
+<div class="robot-side-panel">
+  <div class="robot-container">
+    <!-- Robot normal (visible por defecto) -->
+    <img src="Assets/img/SATI 1.png" alt="SATIBOT" class="git log --oneline" id="robotImg">
+    
+    <!-- GIF de celebración (oculto por defecto) -->
+    <img src="Assets/img/SATI-celebra.gif" alt="¡Trámite Completado!" class="robot-giant-img celebration-gif" id="celebrationGif" style="display: none;">
+    
+    <h2 class="robot-title" id="robotTitle">SATIBOT</h2>
+  </div>
+  <div class="robot-status-badge" id="statusBadge">
+    <span class="status-dot"></span> Asistente Virtual Activo
+  </div>
+</div>
+
+        <div class="cotizacion-container">
+          <div class="progress-section">
+            <div class="progreso-fill" id="p-fill"></div>
+            <div class="pasos">
+              <div id="st-0" class="paso activo" data-label="Inicio">
+                <i class="fas fa-user-check"></i>
+              </div>
+              <div id="st-1" class="paso" data-label="Validación">
+                <i class="fas fa-search-dollar"></i>
+              </div>
+              <div id="st-2" class="paso" data-label="Finalización">
+                <i class="fas fa-file-invoice"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <div id="mensajes" class="chat-messages"></div>
+            <div class="chat-footer">
+              <div id="opciones-chat" class="chat-options"></div>
+              <div class="input-area" id="inputAreaContainer" style="display: none;">
+                <div class="input-wrapper">
+                  <div id="ghostText" class="ghost-suggestion"></div>
+                  <input type="text" id="userInput" placeholder="POR FAVOR, INGRESA TU NÚMERO DE DNI" maxlength="8" autocomplete="off" />
+                </div>
+                <button id="btnEnviar" class="btn-send">
+                  <span>CONFIRMAR</span> <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <h3>Acerca de SAT</h3>
+          <p>Servicio de Administración Tributaria de Lima. Trabajando para brindarte un mejor servicio ciudadano.</p>
+        </div>
+        <div class="footer-links">
+          <h3>Servicios</h3>
+          <ul>
+            <li>Consulta Deudas</li>
+            <li>Fraccionamientos</li>
+            <li>Pagos Virtuales</li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contacto</h3>
+          <p><i class="fas fa-phone"></i> +51 315-2400</p>
+          <p><i class="fas fa-envelope"></i> consultas@sat.gob.pe</p>
+        </div>
+      </div>
+    </footer>
+
+<!-- ============================================================ -->
+<!-- ESTILOS ADICIONALES PARA CELEBRACIÓN Y CONFETI                -->
+<!-- ============================================================ -->
+<style>
+  /* --- ESTILOS PARA EL GIF DE CELEBRACIÓN --- */
+  .celebration-gif {
+    animation: celebrationFloat 1.5s ease-in-out infinite !important;
+    filter: drop-shadow(0 15px 35px rgba(16, 185, 129, 0.3)) !important;
+  }
+
+  @keyframes celebrationFloat {
+    0%, 100% { 
+      transform: translateY(0) scale(1); 
+    }
+    25% { 
+      transform: translateY(-15px) scale(1.05); 
+    }
+    75% { 
+      transform: translateY(-15px) scale(1.05); 
+    }
+  }
+
+  /* Estado de celebración para el badge */
+  .status-badge-celebration {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    animation: badgePulse 1.5s ease-in-out infinite;
+  }
+
+  .status-badge-celebration .status-dot {
+    background: #fbbf24 !important;
+    box-shadow: 0 0 15px #fbbf24 !important;
+    animation: dotCelebrate 0.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes dotCelebrate {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.5); }
+  }
+
+  @keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+    50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.5); }
+  }
+
+  /* Título del robot en modo celebración */
+  .robot-title-celebration {
+    color: #10b981 !important;
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+    animation: titleCelebrate 2s ease-in-out infinite;
+  }
+
+  @keyframes titleCelebrate {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* --- CONFETI --- */
+  @keyframes confettiFall {
+    0% {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(calc(100vh)) rotate(720deg) scale(0.5);
+    }
+  }
+
+  .confetti-piece {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+  }
+</style>
+
+<script src="js/flujoChat.js"></script>
+<script src="js/main.js"></script>
+
+<!-- ============================================================ -->
+<!-- CÓDIGO ADICIONAL PARA CELEBRACIÓN Y CONFETI                   -->
+<!-- ============================================================ -->
+<script>
+// ============================================================
+// FUNCIONES DE CELEBRACIÓN - Se integran con main.js
+// ============================================================
+
+// Referencias a los elementos (ya existen en main.js, pero las reafirmamos)
+const robotImgEl = document.getElementById("robotImg");
+const celebrationGifEl = document.getElementById("celebrationGif");
+const robotTitleEl = document.getElementById("robotTitle");
+const statusBadgeEl = document.getElementById("statusBadge");
+
+// Función para activar el modo celebración
+function activateCelebration() {
+  // Ocultar el robot normal
+  if (robotImgEl) robotImgEl.style.display = "none";
+  
+  // Mostrar el GIF de celebración
+  if (celebrationGifEl) {
+    celebrationGifEl.style.display = "block";
+    celebrationGifEl.style.animation = "celebrationFloat 1.5s ease-in-out infinite";
+  }
+  
+  // Cambiar el título
+  if (robotTitleEl) {
+    robotTitleEl.textContent = "🎉 ¡TRÁMITE EXITOSO!";
+    robotTitleEl.className = "robot-title robot-title-celebration";
+  }
+  
+  // Cambiar el badge de estado
+  if (statusBadgeEl) {
+    statusBadgeEl.className = "robot-status-badge status-badge-celebration";
+    statusBadgeEl.innerHTML = `
+      <span class="status-dot"></span> 
+      ¡Trámite Completado con Éxito! ✨
+    `;
+  }
+  
+  // Lanzar confeti
+  createConfetti();
+}
+
+// Función para desactivar la celebración (volver al estado normal)
+function deactivateCelebration() {
+  if (robotImgEl) robotImgEl.style.display = "block";
+  if (celebrationGifEl) celebrationGifEl.style.display = "none";
+  if (robotTitleEl) {
+    robotTitleEl.textContent = "SATIBOT";
+    robotTitleEl.className = "robot-title";
+  }
+  if (statusBadgeEl) {
+    statusBadgeEl.className = "robot-status-badge";
+    statusBadgeEl.innerHTML = `
+      <span class="status-dot"></span> Asistente Virtual Activo
+    `;
+  }
+}
+
+// --- EFECTO DE CONFETI ---
+function createConfetti() {
+  const colors = ['#10b981', '#fbbf24', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#06b6d4'];
+  const container = document.querySelector('.robot-side-panel');
+  if (!container) return;
+  
+  for (let i = 0; i < 60; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti-piece';
+    const size = 6 + Math.random() * 10;
+    const isCircle = Math.random() > 0.5;
+    confetti.style.cssText = `
+      width: ${size}px;
+      height: ${isCircle ? size : size * 0.4}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      left: ${Math.random() * 100}%;
+      top: -20px;
+      border-radius: ${isCircle ? '50%' : '2px'};
+      animation: confettiFall ${2 + Math.random() * 3}s linear forwards;
+      animation-delay: ${Math.random() * 2}s;
+      transform: rotate(${Math.random() * 360}deg);
+    `;
+    container.appendChild(confetti);
+    
+    // Eliminar el confeti después de la animación
+    setTimeout(() => {
+      if (confetti.parentNode) confetti.remove();
+    }, 5000);
+  }
+}
+
+// ============================================================
+// SOBRESCRIBIR LA FUNCIÓN generatePDF PARA INCLUIR CELEBRACIÓN
+// ============================================================
+// Guardamos la función original
+const originalGeneratePDF = window.generatePDF || function() {};
+
+// Sobrescribimos generatePDF
+window.generatePDF = function() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const d = window.state?.deudaOficial || { papeleta: "N/A", monto: "0.00", codigoSolicitud: window.state?.sol || "SAT-" + Math.floor(10000000 + Math.random() * 90000000) };
+  const documento = window.state?.dni || window.state?.ruc || "N/A";
+
+  doc.setFillColor(13, 90, 167); doc.rect(0, 0, 210, 50, 'F');
+  if (window.state?.logoBase64) doc.addImage(window.state.logoBase64, 'PNG', 15, 10, 30, 30);
+  doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.text("SAT - LIMA", 55, 25);
+  doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text("SISTEMA DE FRACCIONAMIENTO VIRTUAL INTELIGENTE", 55, 35);
+
+  doc.setTextColor(40); doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text("CONSTANCIA DE FRACCIONAMIENTO", 20, 70);
+  doc.setDrawColor(13, 90, 167); doc.setLineWidth(0.5); doc.line(20, 75, 190, 75);
+
+  const rows = [
+    ["CÓDIGO DE TRÁMITE:", d.codigoSolicitud || window.state?.sol || "N/A"],
+    ["DOCUMENTO:", documento],
+    ["TIPO DOCUMENTO:", window.estadoFlujo?.tipoDocumento ? window.estadoFlujo.tipoDocumento.toUpperCase() : "N/A"],
+    ["NÚMERO DE PAPELETA:", d.papeleta],
+    ["MONTO TOTAL DEUDA:", `S/ ${d.monto}`],
+    ["ESTADO ACTUAL:", "APROBADO Y REGISTRADO"],
+    ["FECHA DE EMISIÓN:", new Date().toLocaleDateString()]
+  ];
+  
+  let y = 90;
+  rows.forEach(r => {
+    doc.setFillColor(248, 250, 252); doc.rect(20, y - 7, 170, 12, 'F');
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text(r[0], 25, y);
+    doc.setFont("helvetica", "normal"); doc.text(r[1], 85, y);
+    y += 15;
+  });
+
+  doc.setFontSize(9); doc.setTextColor(150); doc.text("Este documento es oficial y ha sido generado por el Asistente Virtual SATIBOT AI.", 105, 275, { align: "center" });
+  
+  const nombreArchivo = `SAT_Constancia_${documento}.pdf`;
+  doc.save(nombreArchivo);
+  
+  // Actualizar estado
+  if (window.state) {
+    window.state.pdfDescargado = true;
+  }
+  if (window.updateProgress) {
+    window.updateProgress(3);
+  }
+  
+  // ========== ACTIVAR CELEBRACIÓN ==========
+  activateCelebration();
+  
+  // Mensaje de confirmación
+  setTimeout(() => {
+    const msgDiv = document.getElementById("mensajes");
+    if (msgDiv) {
+      const wrap = document.createElement("div");
+      wrap.className = "mensaje-wrapper bot-wrapper";
+      const inner = document.createElement("div");
+      inner.className = "mensaje bot-msg";
+      inner.innerHTML = marked.parse(`
+        🎊 ¡Listo! Tu constancia se ha descargado.
+
+        **Código de trámite:** ${d.codigoSolicitud || window.state?.sol || "N/A"}
+
+        Ha sido un placer acompañarte en este trámite. 
+        ¿Deseas hacer algo más? 😊
+      `);
+      wrap.appendChild(inner);
+      msgDiv.appendChild(wrap);
+      msgDiv.scrollTop = msgDiv.scrollHeight;
+    }
+  }, 1000);
+};
+
+// ============================================================
+// REINICIAR FLUJO CON DESACTIVACIÓN DE CELEBRACIÓN
+// ============================================================
+// Guardamos la función original de reinicio si existe
+const originalReiniciar = window.reiniciarFlujo || function() {};
+
+// Sobrescribimos reiniciarFlujo
+window.reiniciarFlujo = function() {
+  // Llamar a la función original si existe
+  if (typeof originalReiniciar === 'function') {
+    originalReiniciar();
+  }
+  
+  // Desactivar celebración
+  deactivateCelebration();
+};
+
+console.log("🎉 Sistema de celebración activado - El GIF aparecerá al descargar la constancia");
+</script>
+  </body>
+</html>
