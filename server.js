@@ -1,22 +1,22 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-// Servir archivos estáticos
+// Servir archivos estáticos desde la raíz
 app.use(express.static(__dirname));
 
-// Ruta principal
+// Ruta principal - sirve index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API para el logo (opcional)
-app.get('/api/logo-base64', (req, res) => {
-  // Si tienes un logo en base64, devuélvelo aquí
-  res.json({ base64: null });
+// Manejar todas las rutas no encontradas
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
+// Iniciar servidor
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor SAT corriendo en http://localhost:${PORT}`);
 });
